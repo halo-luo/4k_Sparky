@@ -43,34 +43,16 @@ class ShowSparky:
             # 检查摄像头是否成功打开
             if not cap.isOpened():
                 print("错误：无法打开摄像头！检查是否被占用或驱动是否正常")
-            paused = False
 
-            while True:
-                if not paused:
-                    ret, frame = cap.read()  # 读取一帧
-                    if not ret:
-                        print("无法读取画面（摄像头断开？）")
-                        break
+            ret, frame = cap.read()  # 读取一帧
+            if not ret:
+                print("无法读取画面（摄像头断开？）")
 
-                    img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                    self.update_img_label(img)
-
-                # 键盘响应
-                key = cv2.waitKey(1) & 0xFF  # 每1ms检查一次按键
-
-                if key == ord('q'):  # 按 q 退出
-                    break
-                elif key == ord('s'):  # 按 s 截图保存到当前目录
-                    filename = f"../4K.jpg"
-                    cv2.imwrite(filename, frame)
-                    print(f"截图已保存：{filename}")
-                elif key == ord(' '):  # 按空格暂停/继续
-                    paused = not paused
-                    print("暂停" if paused else "继续")
+            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            self.update_img_label(img)
 
             # 释放资源
             cap.release()
-            cv2.destroyAllWindows()
             print("摄像头已关闭")
 
         except Exception as e:
