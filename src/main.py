@@ -3,6 +3,9 @@ from tkinter import filedialog, messagebox, scrolledtext
 from tkinter import ttk
 from PIL import Image, ImageTk
 import cv2
+import subprocess
+import threading
+import queue
 
 
 def open_img(img_path):
@@ -59,7 +62,11 @@ class ShowSparky:
     def img_combo_on_select(self, event=None):
         selected = self.img_combo.get()
         if selected == "4K":
-            self.show_4k()
+            # 使用线程，虽然画面还会延迟，但是界面不会卡住了
+            sub_thread = threading.Thread(target=self.show_4k)
+            sub_thread.start()
+
+            # self.show_4k()
             return
         img_path = self.img_path_dict[selected]
         img = open_img(img_path)
