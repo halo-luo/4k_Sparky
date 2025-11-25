@@ -6,6 +6,7 @@ import cv2
 import subprocess
 import threading
 import queue
+from ultralytics import YOLO
 
 
 def open_img(img_path):
@@ -17,6 +18,10 @@ def open_img(img_path):
     return img
 
 
+def classify_img(img):
+    return
+
+
 class ShowSparky:
     def __init__(self, root: tk.Tk):
         self.root = root
@@ -26,6 +31,7 @@ class ShowSparky:
         self.root.resizable(False, False)
 
         self.img_path_dict = {}
+        self.yolo_model = None
 
         # 图片清晰度选择按钮
         self.img_combo = None
@@ -53,8 +59,14 @@ class ShowSparky:
             if not ret:
                 print("无法读取画面（摄像头断开？）")
             else:
-                img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                self.update_img_label(img)
+                # img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                # self.update_img_label(img)
+
+                results = self.yolo_model(frame, verbose=False)[0]
+                annotated_frame = results.plot()  # 关键！这张图已经带框、标签、置信度
+                img_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(img_rgb)
+                self.update_img_label(pil_img)
 
         except Exception as e:
             messagebox.showerror(f"<UNK>:{e}")
@@ -98,10 +110,14 @@ class ShowSparky:
         self.create_widgets()
         self.img_combo_on_select(None)
 
+    def load_yolo_model(self):
+        self.yolo_model = YOLO("./yolov8s.pt")  # small
+
 
 if __name__ == '__main__':
     print("hello Sparky")
     window = tk.Tk()
     sparky = ShowSparky(window)
+    sparky.load_yolo_model()
     sparky.run()
     window.mainloop()
